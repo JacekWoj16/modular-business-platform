@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TODO: react-grid-layout base styles + custom grid/panel overrides
+   per the "Dashboard Grid" and "Panel Chrome" sections of docs/architecture.md. */
