@@ -96,8 +96,8 @@ npm test
 - [x] Event bus (client) + client-side panel registry
 - [x] Customers module (reference implementation for "how to add a module") — server CRUD + 3 panels
 - [x] Sales module — order lifecycle, invoicing, depends on Customers
-- [ ] Inventory module
-- [ ] Panel grid + layout persistence
+- [x] Inventory module — stock movements, low-stock alerts, independent module
+- [ ] Panel grid + layout persistence + auth (needed to actually see any of this running)
 - [ ] Seed data
 - [ ] Screenshots in `docs/screenshots/`
 

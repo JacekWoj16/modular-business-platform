@@ -3,8 +3,9 @@
 This document explains the three ideas that make this project more than a CRUD demo:
 the **module registry**, the **event bus**, and the **panel ≠ logic** separation.
 
-> Status: module registry, event bus, and the Customers and Sales modules
-> (server + client) are implemented. Inventory and the panel grid shell are next.
+> Status: module registry, event bus, and all 3 demo modules (Customers, Sales,
+> Inventory — server + client) are implemented. The panel grid shell and auth
+> are next — needed to actually see any of this running in a browser.
 
 ## 1. Module Registry
 
@@ -75,9 +76,16 @@ Events implemented so far (Customers + Sales):
 
 This is Sales depending on Customers in action: `NewOrderPanel` pre-fills from
 `customers.selected` without importing anything from the Customers module —
-it only knows the event name and payload shape. Inventory will add
-`inventory.*` events the same way — see the full catalog in the original
-project spec.
+it only knows the event name and payload shape.
+
+Inventory has no module dependencies, and its events show the other pattern —
+one panel owning a poll and broadcasting what it found, so any other panel
+can react without running its own fetch loop:
+
+| Event | Emitter | Payload | Listeners |
+|---|---|---|---|
+| `inventory.low-stock` | `StockAlertsPanel` (polls every 60s) | `{ products: Product[] }` | (available for any panel that wants it) |
+| `inventory.stock-moved` | `StockMovementPanel` | `{ productId, type, qty }` | `ProductListPanel`, `StockAlertsPanel` (refresh) |
 
 ## 3. Panel ≠ Logic
 
