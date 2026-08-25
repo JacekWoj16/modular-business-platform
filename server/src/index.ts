@@ -4,10 +4,13 @@ import { config } from './config';
 import { errorMiddleware } from './middleware/error.middleware';
 import { moduleRegistry } from './modules/registry';
 import { customersModule } from './modules/customers/customers.module';
+import { salesModule } from './modules/sales/sales.module';
 
 // Registration order matters: a module's dependencies must be registered
-// before it is. Sales and Inventory will be added here as they're built.
+// before it is. Sales depends on Customers, so Customers goes first.
+// Inventory will be added here once it's built.
 moduleRegistry.register(customersModule);
+moduleRegistry.register(salesModule);
 
 const app = express();
 

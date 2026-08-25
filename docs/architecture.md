@@ -3,8 +3,8 @@
 This document explains the three ideas that make this project more than a CRUD demo:
 the **module registry**, the **event bus**, and the **panel ≠ logic** separation.
 
-> Status: module registry, event bus, and the Customers module (server + client)
-> are implemented. Sales, Inventory, and the panel grid shell are next.
+> Status: module registry, event bus, and the Customers and Sales modules
+> (server + client) are implemented. Inventory and the panel grid shell are next.
 
 ## 1. Module Registry
 
@@ -62,16 +62,22 @@ with `emit`/`on`/`off`, plus a singleton export. The `useEventBus` hook
 (`client/src/hooks/useEventBus.ts`) subscribes on mount and unsubscribes on
 unmount so a closed panel never leaks a listener.
 
-Events implemented so far (Customers module):
+Events implemented so far (Customers + Sales):
 
 | Event | Emitter | Payload | Listeners |
 |---|---|---|---|
-| `customers.selected` | `CustomerListPanel` (via `customers.store`) | `{ customerId: number }` | `CustomerDetailPanel` |
+| `customers.selected` | `CustomerListPanel` (via `customers.store`) | `{ customerId: number }` | `CustomerDetailPanel`, `NewOrderPanel` |
 | `customers.created` | `NewCustomerPanel` | `{ customer: Customer }` | `CustomerListPanel` (refresh) |
 | `customers.updated` | `CustomerDetailPanel` | `{ customer: Customer }` | `CustomerListPanel` (refresh) |
+| `sales.order-created` | `NewOrderPanel` | `{ order: OrderWithItems }` | `OrdersPanel`, `SalesAlertsPanel` (refresh) |
+| `sales.order-selected` | `OrdersPanel` (via `sales.store`) | `{ orderId: number }` | `OrderDetailPanel` |
+| `sales.status-changed` | `OrderDetailPanel` | `{ orderId: number, newStatus: OrderStatus }` | `OrdersPanel`, `SalesAlertsPanel` (refresh) |
 
-Sales and Inventory will add `sales.*` / `inventory.*` events the same way —
-see the full catalog in the original project spec.
+This is Sales depending on Customers in action: `NewOrderPanel` pre-fills from
+`customers.selected` without importing anything from the Customers module —
+it only knows the event name and payload shape. Inventory will add
+`inventory.*` events the same way — see the full catalog in the original
+project spec.
 
 ## 3. Panel ≠ Logic
 

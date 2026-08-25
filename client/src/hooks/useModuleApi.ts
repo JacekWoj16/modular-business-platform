@@ -47,6 +47,21 @@ export function useModuleApi(moduleId: string) {
         request<T>(`${base}/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
       remove: (id: number | string): Promise<void> =>
         request<void>(`${base}/${id}`, { method: 'DELETE' }),
+      /**
+       * For sub-resource actions that don't fit plain REST CRUD, e.g.
+       * `PATCH /orders/:id/status` or `POST /orders/:id/invoice`:
+       *   salesApi.action(orderId, 'status', 'PATCH', { status: 'confirmed' })
+       */
+      action: <T>(
+        id: number | string,
+        subPath: string,
+        method: 'POST' | 'PATCH',
+        body?: unknown,
+      ): Promise<T> =>
+        request<T>(`${base}/${id}/${subPath}`, {
+          method,
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+        }),
     };
   }, [moduleId]);
 }

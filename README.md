@@ -95,7 +95,7 @@ npm test
 - [x] Module registry (server) and migration runner
 - [x] Event bus (client) + client-side panel registry
 - [x] Customers module (reference implementation for "how to add a module") — server CRUD + 3 panels
-- [ ] Sales module
+- [x] Sales module — order lifecycle, invoicing, depends on Customers
 - [ ] Inventory module
 - [ ] Panel grid + layout persistence
 - [ ] Seed data
