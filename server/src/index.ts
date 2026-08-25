@@ -14,6 +14,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// This is a pure JSON API — the app itself is served by the client's Vite
+// dev server (or its built static files), not from here. A bare `GET /`
+// hits Express's default 404 otherwise, which reads like something's
+// broken rather than "you're looking at the wrong port".
+app.get('/', (_req, res) => {
+  res.json({
+    message: 'Modular Business App API. The web app runs on the client dev server (see README) — this port only serves /api/*.',
+    health: '/api/health',
+  });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
