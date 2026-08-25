@@ -92,9 +92,9 @@ npm test
 ## Roadmap
 
 - [x] Repository structure, tooling config, DB schema
-- [ ] Module registry (server + client) and migration runner
-- [ ] Event bus
-- [ ] Customers module (reference implementation for "how to add a module")
+- [x] Module registry (server) and migration runner
+- [x] Event bus (client) + client-side panel registry
+- [x] Customers module (reference implementation for "how to add a module") — server CRUD + 3 panels
 - [ ] Sales module
 - [ ] Inventory module
 - [ ] Panel grid + layout persistence

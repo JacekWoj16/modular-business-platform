@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 
 /**
  * Throw this from a service/route handler to produce a specific HTTP status
@@ -12,6 +12,19 @@ export class HttpError extends Error {
     super(message);
     this.name = 'HttpError';
   }
+}
+
+/**
+ * Wraps an async Express handler so a rejected promise reaches
+ * errorMiddleware via next() instead of crashing the process. Every route
+ * handler that does `await` should be wrapped in this.
+ */
+export function asyncHandler(
+  handler: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+): RequestHandler {
+  return (req, res, next) => {
+    handler(req, res, next).catch(next);
+  };
 }
 
 /**

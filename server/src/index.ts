@@ -3,12 +3,11 @@ import express from 'express';
 import { config } from './config';
 import { errorMiddleware } from './middleware/error.middleware';
 import { moduleRegistry } from './modules/registry';
+import { customersModule } from './modules/customers/customers.module';
 
-// TODO: as each module is implemented, import its `<name>.module.ts` here so
-// registration runs before the server starts listening, e.g.:
-//   import { customersModule } from './modules/customers/customers.module';
-//   moduleRegistry.register(customersModule);
-// Then mount each module's router below.
+// Registration order matters: a module's dependencies must be registered
+// before it is. Sales and Inventory will be added here as they're built.
+moduleRegistry.register(customersModule);
 
 const app = express();
 
