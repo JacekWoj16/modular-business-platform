@@ -3,9 +3,8 @@
 This document explains the three ideas that make this project more than a CRUD demo:
 the **module registry**, the **event bus**, and the **panel ≠ logic** separation.
 
-> Status: module registry, event bus, and all 3 demo modules (Customers, Sales,
-> Inventory — server + client) are implemented. The panel grid shell and auth
-> are next — needed to actually see any of this running in a browser.
+> Status: everything below is implemented and running — module registry, event
+> bus, all 3 demo modules, auth, and the panel grid with persisted layouts.
 
 ## 1. Module Registry
 
@@ -93,6 +92,55 @@ Hiding a panel does not disable its module. Example: a sales rep hides the
 "Shipping Data" panel, but when they create an order, shipping data is still pulled
 from the customer record in the database and attached to the order. The panel is a
 view layer; the module logic runs regardless of what's visible.
+
+## 4. Auth, Layout Persistence, and the Panel Grid
+
+The pieces that turn the modules above into something you actually open in a
+browser:
+
+- **Auth** (`server/src/auth/`) — a `users` table, bcrypt password hashes, and
+  a JWT (`server/src/middleware/auth.middleware.ts`) carrying `{ id, username,
+  role }`. `GET /api/auth/me` returns the user plus `enabledModuleIds` — the
+  `user_modules` join table. `PATCH /api/auth/modules/:id` toggles a module
+  on/off for the logged-in user and, if the module being enabled has
+  dependencies, auto-enables those too (and reports which ones, so the
+  Settings page can say why something else just lit up).
+- **Layout persistence** (`server/src/layout/`) — `user_layouts` stores one
+  row per (user, panel): position, size, visibility, pin state. `GET
+  /api/layout` merges saved rows with auto-arranged defaults (a simple
+  left-to-right bin-pack, `defaultLayoutFor` in `layout.service.ts`) for any
+  enabled panel that doesn't have a saved row yet — so a module you just
+  enabled shows up somewhere sane instead of nowhere. `POST /api/layout/reset`
+  deletes the saved rows, falling back to those defaults.
+- **Client bootstrap** — `client/src/core/panel-manifest.ts` imports every
+  panel file purely for its self-registration side effect (see §1); `App.tsx`
+  restores a session from `localStorage` on load; `modules.store.ts` fetches
+  the module catalog and keeps the *enabled* subset in its own Zustand state
+  (`enabledModules`) rather than reading `moduleRegistry` directly in a render
+  body — `moduleRegistry` is a plain singleton, so components that read it
+  without a store subscription never re-render when it changes. `ModuleNavigator`
+  and `Dashboard` both learned this the hard way (see the bug note below).
+- **The grid** (`client/src/components/layout/Dashboard.tsx`) — a thin wrapper
+  around `react-grid-layout`. `PanelWrapper.tsx` renders the pin/minimize/close
+  chrome every panel gets regardless of module, and *is* the drag handle
+  (`.panel-drag-handle`, passed to `GridLayout` as `draggableHandle`). Pinned
+  panels are marked `static` so the grid won't move them.
+
+**Bug found and fixed during manual testing:** the pin/minimize/close buttons
+live inside the drag handle. A real mouse click is a `mousedown` →
+(micro-)`move` → `mouseup` sequence, and react-draggable — which
+react-grid-layout uses internally — was interpreting that sequence as a drag
+attempt and swallowing the click before it ever reached the button's
+`onClick`. A synthetic `element.click()` doesn't reproduce this (no mousedown/
+mouseup), which is why it went unnoticed until a real headless-browser click
+was used to verify the feature. Fixed with one `onMouseDown={(e) =>
+e.stopPropagation()}` on the button row, so the drag handler never sees the
+mousedown in the first place. A second, related bug in the same pass: `Dashboard`'s
+`onLayoutChange` closed over `items` from render scope, and react-grid-layout
+calls that callback on every render (not just real drags/resizes) — a stale
+closure could occasionally re-save an old visibility/pin state over a newer
+one. Fixed by reading `useLayoutStore.getState().items` fresh inside the
+callback and only writing back when x/y/w/h actually changed.
 
 ## Adding a New Module (Developer Guide)
 

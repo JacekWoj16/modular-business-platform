@@ -4,9 +4,11 @@ A modular, panel-based dashboard platform for small businesses (retail shops, ha
 salons, pizzerias, warehouses, factories) — enable only the modules you need, and
 arrange the dashboard panels freely.
 
-> **Status:** early scaffold. The repository structure, database schema, and tooling
-> config are in place; module and UI implementation is in progress. See
-> [Roadmap](#roadmap) below.
+> **Status:** functional end-to-end. All 3 demo modules, auth, the panel grid, and
+> layout persistence work — the screenshot below is a real run, not a mockup. See
+> [Roadmap](#roadmap) below for what's still open.
+
+![Dashboard, logged in as admin](docs/screenshots/dashboard-admin.png)
 
 ## Architecture Overview
 
@@ -97,12 +99,13 @@ npm test
 - [x] Customers module (reference implementation for "how to add a module") — server CRUD + 3 panels
 - [x] Sales module — order lifecycle, invoicing, depends on Customers
 - [x] Inventory module — stock movements, low-stock alerts, independent module
-- [ ] Panel grid + layout persistence + auth (needed to actually see any of this running)
-- [ ] Seed data
-- [ ] Screenshots in `docs/screenshots/`
+- [x] Panel grid + layout persistence + auth — react-grid-layout, JWT, per-user saved layouts
+- [x] Seed data — 3 users, 15 customers, 20 products, 30 stock movements, 12 orders
+- [x] Screenshots in `docs/screenshots/`
+- [ ] Automated tests (`server/test/`)
 
 See [docs/architecture.md](docs/architecture.md) for the developer guide on adding a
-new module once the reference implementation lands.
+new module.
 
 ## License
 

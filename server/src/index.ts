@@ -3,16 +3,11 @@ import express from 'express';
 import { config } from './config';
 import { errorMiddleware } from './middleware/error.middleware';
 import { moduleRegistry } from './modules/registry';
-import { customersModule } from './modules/customers/customers.module';
-import { salesModule } from './modules/sales/sales.module';
-import { inventoryModule } from './modules/inventory/inventory.module';
+import { registerAllModules } from './modules/register-all';
+import { authRouter } from './auth/auth.routes';
+import { layoutRouter } from './layout/layout.routes';
 
-// Registration order matters: a module's dependencies must be registered
-// before it is. Sales depends on Customers, so Customers goes first.
-// Inventory has no dependencies.
-moduleRegistry.register(customersModule);
-moduleRegistry.register(salesModule);
-moduleRegistry.register(inventoryModule);
+registerAllModules();
 
 const app = express();
 
@@ -36,6 +31,9 @@ app.get('/api/modules', (_req, res) => {
   }));
   res.json(modules);
 });
+
+app.use('/api/auth', authRouter);
+app.use('/api/layout', layoutRouter);
 
 for (const module of moduleRegistry.list()) {
   if (module.router) {

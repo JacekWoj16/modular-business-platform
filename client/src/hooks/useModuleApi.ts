@@ -1,23 +1,7 @@
 import { useMemo } from 'react';
+import { apiRequest as request } from '../core/api-client';
 
 const API_BASE = '/api/modules';
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}) as { error?: string });
-    throw new Error(body.error ?? `Request failed with status ${response.status}`);
-  }
-
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return response.json() as Promise<T>;
-}
 
 type QueryValue = string | number | boolean | undefined;
 
